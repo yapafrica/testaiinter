@@ -7,186 +7,230 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
             margin: 0;
             padding: 0;
-            background-color: #f7f7f7;
-            color: #333;
-            height: 100%;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
         }
-        header {
-            background-color: #343a40;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-        }
+
         .container {
+            width: 70%;
+            margin: 50px auto;
+            background-color: #fff;
             padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             flex-grow: 1;
         }
-        .question {
-            font-size: 20px;
-            margin-bottom: 20px;
+
+        h1 {
+            text-align: center;
         }
-        .input-container {
-            margin-bottom: 20px;
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
-        #userAnswer {
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        textarea {
             width: 100%;
             padding: 10px;
-            font-size: 18px;
-        }
-        #feedback {
             font-size: 16px;
-            margin-top: 20px;
-            color: #555;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
+
+        .hidden {
+            display: none;
+        }
+
+        hr {
+            margin: 30px 0;
+        }
+
         footer {
-            background-color: #343a40;
-            color: #fff;
+            background-color: #333;
+            color: white;
             text-align: center;
             padding: 10px;
             position: relative;
-            bottom: 0;
             width: 100%;
+            margin-top: auto;
         }
-        .btn {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
+
+        .footer-content {
+            font-size: 14px;
         }
-        .btn:hover {
-            background-color: #0056b3;
-        }
-        .mic-btn {
-            margin-top: 10px;
-            background-color: #28a745;
-        }
-        .mic-btn:hover {
-            background-color: #218838;
-        }
-        #liveFeedback {
+
+        #loading {
+            display: none;
+            text-align: center;
             font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
-        .role-selection {
-            margin-bottom: 20px;
-        }
-        select {
-            width: 100%;
-            padding: 10px;
-            font-size: 18px;
+            color: #ff8c00;
         }
     </style>
 </head>
 <body>
-
-<header>
-    <h1>AI Interview Coach</h1>
-</header>
-
-<div class="container">
-    <div class="role-selection">
-        <label for="roleSelect">Select Your Role:</label>
-        <select id="roleSelect">
-            <option value="graduate">Graduate Trainee</option>
-            <option value="finance">Finance Officer</option>
-            <option value="manager">Finance Manager</option>
+    <div class="container">
+        <h1>AI Interview Coach</h1>
+        <p>Prepare for your interview with personalized questions and real-time feedback.</p>
+        
+        <!-- Job Role Selection -->
+        <label for="jobRole">Select Job Role:</label>
+        <select id="jobRole">
+            <option value="Accountant">Accountant</option>
+            <option value="Financial Analyst">Financial Analyst</option>
+            <option value="Tax Consultant">Tax Consultant</option>
+            <option value="Graduate Trainee">Graduate Trainee</option>
+            <option value="Finance Officer">Finance Officer</option>
         </select>
+
+        <br><br>
+
+        <!-- Interview Type Selection -->
+        <label for="interviewType">Select Interview Type:</label>
+        <select id="interviewType">
+            <option value="Behavioral">Behavioral</option>
+            <option value="Technical">Technical</option>
+            <option value="Situational">Situational</option>
+        </select>
+
+        <br><br>
+
+        <button id="startInterviewBtn">Start Interview</button>
+        
+        <hr>
+
+        <!-- Interview Questions -->
+        <div id="interviewSection" class="hidden">
+            <h2>Question 1: </h2>
+            <p id="questionText"></p>
+            <textarea id="userAnswer" rows="4" cols="50" placeholder="Your answer here..."></textarea><br>
+            <button id="submitAnswerBtn">Submit Answer</button>
+            <button id="voiceInputBtn">Use Voice Input</button>
+            <p id="feedbackText"></p>
+            <p id="loading">Processing your answer...</p>
+        </div>
     </div>
 
-    <div class="question" id="question">What is your greatest strength?</div>
+    <footer>
+        <div class="footer-content">
+            &copy; 2025 AI Interview Coach. All Rights Reserved.
+        </div>
+    </footer>
 
-    <div class="input-container">
-        <input type="text" id="userAnswer" placeholder="Your answer here...">
-    </div>
+    <script>
+        document.getElementById('startInterviewBtn').addEventListener('click', function() {
+            document.getElementById('interviewSection').classList.remove('hidden');
+            startInterview();
+        });
 
-    <button class="btn mic-btn" id="startRecognition">Start Voice Input</button>
+        const questions = {
+            'Accountant': {
+                'Behavioral': [
+                    'Tell me about a time when you worked under pressure.',
+                    'Describe a situation where you resolved a financial discrepancy.'
+                ],
+                'Technical': [
+                    'What are the key principles of financial accounting?',
+                    'How do you handle tax calculations for a business?'
+                ],
+                'Situational': [
+                    'What would you do if you noticed an error in a client’s financial report?',
+                    'How would you explain a complex financial report to a non-financial person?'
+                ]
+            },
+            // Other job roles here...
+        };
 
-    <div id="liveFeedback"></div>
+        let currentQuestionIndex = 0;
+        let currentJobRole = '';
+        let currentInterviewType = '';
 
-    <div id="feedback"></div>
-</div>
+        function startInterview() {
+            currentJobRole = document.getElementById('jobRole').value;
+            currentInterviewType = document.getElementById('interviewType').value;
 
-<footer>
-    <p>&copy; 2025 AI Interview Coach</p>
-</footer>
+            // Set the first question
+            showQuestion();
+        }
 
-<script>
-// Check if SpeechRecognition API is available
-let recognition;
-if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'en-US';
-    recognition.continuous = true;
-    recognition.interimResults = true;
+        function showQuestion() {
+            const questionList = questions[currentJobRole][currentInterviewType];
+            if (currentQuestionIndex < questionList.length) {
+                document.getElementById('questionText').innerText = questionList[currentQuestionIndex];
+                document.getElementById('submitAnswerBtn').disabled = false;
+            } else {
+                document.getElementById('questionText').innerText = "You've completed the interview. Great job!";
+                document.getElementById('submitAnswerBtn').disabled = true;
+            }
+        }
 
-    // Display real-time feedback while recognizing speech
-    recognition.onresult = function(event) {
-        const spokenText = event.results[0][0].transcript;
+        document.getElementById('submitAnswerBtn').addEventListener('click', function() {
+            const userAnswer = document.getElementById('userAnswer').value;
+            if (userAnswer) {
+                provideFeedback(userAnswer);
+                currentQuestionIndex++;
+                setTimeout(() => {
+                    showQuestion();
+                    document.getElementById('userAnswer').value = '';
+                }, 2000);
+            }
+        });
 
-        // Show real-time feedback while user is speaking
-        document.getElementById('liveFeedback').textContent = `You said: ${spokenText}`;
+        function provideFeedback(answer) {
+            // Simple feedback logic (could be expanded with AI)
+            let feedback = 'Your answer is good!';
+            
+            if (answer.length < 50) {
+                feedback = 'Try to elaborate more on your answer.';
+            } else if (answer.includes('tax')) {
+                feedback = 'Good, you mentioned tax—try giving specific examples of your experience with tax filing.';
+            }
 
-        // Update the input field with the most recent spoken text
-        document.getElementById('userAnswer').value = spokenText;
+            document.getElementById('feedbackText').innerText = feedback;
+        }
 
-        // Provide some simple feedback based on what's said
-        provideFeedback(spokenText);
-    };
+        // Voice Input functionality
+        document.getElementById('voiceInputBtn').addEventListener('click', function() {
+            if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+                const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.lang = 'en-US';
+                recognition.start();
+                document.getElementById('loading').style.display = 'block';  // Show loading indicator
 
-    recognition.onerror = function(event) {
-        console.error('Speech recognition error', event.error);
-        alert('There was an error with the voice recognition.');
-    };
+                recognition.onresult = function(event) {
+                    const spokenText = event.results[0][0].transcript;
+                    document.getElementById('userAnswer').value = spokenText;
+                    provideFeedback(spokenText);
+                    currentQuestionIndex++;
+                    setTimeout(() => {
+                        showQuestion();
+                    }, 2000);
+                };
 
-    // Start recognition when the button is clicked
-    document.getElementById('startRecognition').addEventListener('click', function() {
-        recognition.start();
-    });
-} else {
-    alert('Speech Recognition is not supported in your browser.');
-}
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error', event.error);
+                    alert('There was an error with the voice recognition.');
+                };
 
-// Simple feedback function based on user response
-function provideFeedback(text) {
-    let feedbackMessage = '';
-    
-    if (text.toLowerCase().includes('strength')) {
-        feedbackMessage = 'Great! You mentioned your strengths, but can you elaborate more on how it helps in your work?';
-    } else if (text.toLowerCase().includes('weakness')) {
-        feedbackMessage = 'Hmm, interesting. Can you provide an example of when this weakness affected your performance?';
-    } else {
-        feedbackMessage = 'Nice answer! Please continue speaking or type if you prefer.';
-    }
-
-    document.getElementById('feedback').textContent = feedbackMessage;
-}
-
-// Handle role selection change
-document.getElementById('roleSelect').addEventListener('change', function() {
-    const selectedRole = document.getElementById('roleSelect').value;
-    let question = '';
-
-    // Customize the question based on the selected role
-    if (selectedRole === 'graduate') {
-        question = 'What skills do you bring to this role as a Graduate Trainee?';
-    } else if (selectedRole === 'finance') {
-        question = 'How do you approach financial analysis as a Finance Officer?';
-    } else if (selectedRole === 'manager') {
-        question = 'What is your management style as a Finance Manager?';
-    }
-
-    // Update the question based on the selected role
-    document.getElementById('question').textContent = question;
-});
-</script>
-
+                recognition.onend = function() {
+                    document.getElementById('loading').style.display = 'none';  // Hide loading indicator
+                };
+            } else {
+                alert('Speech Recognition is not supported in your browser.');
+            }
+        });
+    </script>
 </body>
 </html>
