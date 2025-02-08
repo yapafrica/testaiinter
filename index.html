@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Coach</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 70%;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        hr {
+            margin: 30px 0;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: relative;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Interview Coach</h1>
+        <p>Prepare for your interview with personalized questions and real-time feedback.</p>
+        
+        <!-- Job Role Selection -->
+        <label for="jobRole">Select Job Role:</label>
+        <select id="jobRole">
+            <option value="Accountant">Accountant</option>
+            <option value="Financial Analyst">Financial Analyst</option>
+            <option value="Tax Consultant">Tax Consultant</option>
+            <option value="Graduate Trainee">Graduate Trainee</option>
+            <option value="Finance Officer">Finance Officer</option>
+        </select>
+
+        <br><br>
+
+        <!-- Interview Type Selection -->
+        <label for="interviewType">Select Interview Type:</label>
+        <select id="interviewType">
+            <option value="Behavioral">Behavioral</option>
+            <option value="Technical">Technical</option>
+            <option value="Situational">Situational</option>
+        </select>
+
+        <br><br>
+
+        <button id="startInterviewBtn">Start Interview</button>
+        
+        <hr>
+
+        <!-- Interview Questions -->
+        <div id="interviewSection" class="hidden">
+            <h2>Question 1: </h2>
+            <p id="questionText"></p>
+            <textarea id="userAnswer" rows="4" cols="50" placeholder="Your answer here..."></textarea><br>
+            <button id="submitAnswerBtn">Submit Answer</button>
+            <button id="voiceInputBtn">Use Voice Input</button>
+            <p id="feedbackText"></p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            &copy; 2025 YAP AI Interview Coach. All Rights Reserved.
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('startInterviewBtn').addEventListener('click', function() {
+            document.getElementById('interviewSection').classList.remove('hidden');
+            startInterview();
+        });
+
+        const questions = {
+            'Accountant': {
+                'Behavioral': [
+                    'Tell me about a time when you worked under pressure.',
+                    'Describe a situation where you resolved a financial discrepancy.'
+                ],
+                'Technical': [
+                    'What are the key principles of financial accounting?',
+                    'How do you handle tax calculations for a business?'
+                ],
+                'Situational': [
+                    'What would you do if you noticed an error in a client’s financial report?',
+                    'How would you explain a complex financial report to a non-financial person?'
+                ]
+            },
+            'Financial Analyst': {
+                'Behavioral': [
+                    'Tell me about a challenging financial analysis project you worked on.',
+                    'Describe a time when you had to make a tough financial decision.'
+                ],
+                'Technical': [
+                    'What financial ratios do you analyze to assess a company’s performance?',
+                    'How do you perform cash flow analysis?'
+                ],
+                'Situational': [
+                    'What would you do if you discovered a major financial mistake in a report?',
+                    'How would you handle forecasting for a new product launch?'
+                ]
+            },
+            'Tax Consultant': {
+                'Behavioral': [
+                    'Tell me about a time you helped a client with tax-saving strategies.',
+                    'Describe a situation where you had to explain complex tax concepts to a client.'
+                ],
+                'Technical': [
+                    'What is the difference between tax avoidance and tax evasion?',
+                    'How do you approach tax planning for a small business?'
+                ],
+                'Situational': [
+                    'What would you do if a client refuses to pay the required taxes?',
+                    'How would you advise a business on tax deductions?'
+                ]
+            },
+            'Graduate Trainee': {
+                'Behavioral': [
+                    'Tell me about a time when you had to learn something quickly.',
+                    'Describe a situation where you worked as part of a team.'
+                ],
+                'Technical': [
+                    'What is your understanding of financial forecasting?',
+                    'Explain the concept of working capital and its importance.'
+                ],
+                'Situational': [
+                    'What would you do if you were asked to perform a task you were unfamiliar with?',
+                    'How would you handle multiple deadlines in your role as a graduate trainee?'
+                ]
+            },
+            'Finance Officer': {
+                'Behavioral': [
+                    'Tell me about a challenging financial decision you had to make.',
+                    'Describe a time when you had to work with other departments to solve a financial issue.'
+                ],
+                'Technical': [
+                    'How do you perform budget forecasting?',
+                    'Explain the concept of financial ratios and why they matter.'
+                ],
+                'Situational': [
+                    'What would you do if your team missed a key financial deadline?',
+                    'How would you explain a financial report to a non-financial manager?'
+                ]
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let currentJobRole = '';
+        let currentInterviewType = '';
+
+        function startInterview() {
+            currentJobRole = document.getElementById('jobRole').value;
+            currentInterviewType = document.getElementById('interviewType').value;
+
+            // Set the first question
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const questionList = questions[currentJobRole][currentInterviewType];
+            if (currentQuestionIndex < questionList.length) {
+                document.getElementById('questionText').innerText = questionList[currentQuestionIndex];
+                document.getElementById('submitAnswerBtn').disabled = false;
+            } else {
+                document.getElementById('questionText').innerText = "You've completed the interview. Great job!";
+                document.getElementById('submitAnswerBtn').disabled = true;
+            }
+        }
+
+        document.getElementById('submitAnswerBtn').addEventListener('click', function() {
+            const userAnswer = document.getElementById('userAnswer').value;
+            if (userAnswer) {
+                provideFeedback(userAnswer);
+                currentQuestionIndex++;
+                setTimeout(() => {
+                    showQuestion();
+                    document.getElementById('userAnswer').value = '';
+                }, 2000);
+            }
+        });
+
+        function provideFeedback(answer) {
+            // Simple feedback logic (could be expanded with AI)
+            let feedback = 'Your answer is good!';
+            
+            if (answer.length < 50) {
+                feedback = 'Try to elaborate more on your answer.';
+            } else if (answer.includes('tax')) {
+                feedback = 'Good, you mentioned tax—try giving specific examples of your experience with tax filing.';
+            }
+
+            document.getElementById('feedbackText').innerText = feedback;
+        }
+
+        // Voice Input functionality
+        document.getElementById('voiceInputBtn').addEventListener('click', function() {
+            if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+                const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.lang = 'en-US';
+                recognition.start();
+
+                recognition.onresult = function(event) {
+                    const spokenText = event.results[0][0].transcript;
+                    document.getElementById('userAnswer').value = spokenText;
+                    provideFeedback(spokenText);
+                    currentQuestionIndex++;
+                    setTimeout(() => {
+                        showQuestion();
+                    }, 2000);
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error', event.error);
+                    alert('There was an error with the voice recognition.');
+                };
+            } else {
+                alert('Speech Recognition is not supported in your browser.');
+            }
+        });
+    </script>
+</body>
+</html>
