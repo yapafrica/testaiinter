@@ -70,6 +70,19 @@
         .mic-btn:hover {
             background-color: #218838;
         }
+        #liveFeedback {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .role-selection {
+            margin-bottom: 20px;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
@@ -79,6 +92,15 @@
 </header>
 
 <div class="container">
+    <div class="role-selection">
+        <label for="roleSelect">Select Your Role:</label>
+        <select id="roleSelect">
+            <option value="graduate">Graduate Trainee</option>
+            <option value="finance">Finance Officer</option>
+            <option value="manager">Finance Manager</option>
+        </select>
+    </div>
+
     <div class="question" id="question">What is your greatest strength?</div>
 
     <div class="input-container">
@@ -86,6 +108,8 @@
     </div>
 
     <button class="btn mic-btn" id="startRecognition">Start Voice Input</button>
+
+    <div id="liveFeedback"></div>
 
     <div id="feedback"></div>
 </div>
@@ -103,24 +127,26 @@ if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
     recognition.continuous = true;
     recognition.interimResults = true;
 
-    // Listen for results
+    // Display real-time feedback while recognizing speech
     recognition.onresult = function(event) {
         const spokenText = event.results[0][0].transcript;
-        
+
+        // Show real-time feedback while user is speaking
+        document.getElementById('liveFeedback').textContent = `You said: ${spokenText}`;
+
         // Update the input field with the most recent spoken text
         document.getElementById('userAnswer').value = spokenText;
 
-        // Provide simple feedback based on the response
+        // Provide some simple feedback based on what's said
         provideFeedback(spokenText);
     };
 
-    // Handle errors
     recognition.onerror = function(event) {
         console.error('Speech recognition error', event.error);
         alert('There was an error with the voice recognition.');
     };
 
-    // Start speech recognition on button click
+    // Start recognition when the button is clicked
     document.getElementById('startRecognition').addEventListener('click', function() {
         recognition.start();
     });
@@ -128,13 +154,13 @@ if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
     alert('Speech Recognition is not supported in your browser.');
 }
 
-// Provide feedback based on the spoken answer
-function provideFeedback(spokenText) {
+// Simple feedback function based on user response
+function provideFeedback(text) {
     let feedbackMessage = '';
-
-    if (spokenText.toLowerCase().includes('strength')) {
+    
+    if (text.toLowerCase().includes('strength')) {
         feedbackMessage = 'Great! You mentioned your strengths, but can you elaborate more on how it helps in your work?';
-    } else if (spokenText.toLowerCase().includes('weakness')) {
+    } else if (text.toLowerCase().includes('weakness')) {
         feedbackMessage = 'Hmm, interesting. Can you provide an example of when this weakness affected your performance?';
     } else {
         feedbackMessage = 'Nice answer! Please continue speaking or type if you prefer.';
@@ -142,6 +168,24 @@ function provideFeedback(spokenText) {
 
     document.getElementById('feedback').textContent = feedbackMessage;
 }
+
+// Handle role selection change
+document.getElementById('roleSelect').addEventListener('change', function() {
+    const selectedRole = document.getElementById('roleSelect').value;
+    let question = '';
+
+    // Customize the question based on the selected role
+    if (selectedRole === 'graduate') {
+        question = 'What skills do you bring to this role as a Graduate Trainee?';
+    } else if (selectedRole === 'finance') {
+        question = 'How do you approach financial analysis as a Finance Officer?';
+    } else if (selectedRole === 'manager') {
+        question = 'What is your management style as a Finance Manager?';
+    }
+
+    // Update the question based on the selected role
+    document.getElementById('question').textContent = question;
+});
 </script>
 
 </body>
