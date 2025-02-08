@@ -70,11 +70,6 @@
         .mic-btn:hover {
             background-color: #218838;
         }
-        #liveFeedback {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
     </style>
 </head>
 <body>
@@ -92,8 +87,6 @@
 
     <button class="btn mic-btn" id="startRecognition">Start Voice Input</button>
 
-    <div id="liveFeedback"></div>
-
     <div id="feedback"></div>
 </div>
 
@@ -110,26 +103,24 @@ if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
     recognition.continuous = true;
     recognition.interimResults = true;
 
-    // Display real-time feedback while recognizing speech
+    // Listen for results
     recognition.onresult = function(event) {
         const spokenText = event.results[0][0].transcript;
-
-        // Show real-time feedback while user is speaking
-        document.getElementById('liveFeedback').textContent = `You said: ${spokenText}`;
-
+        
         // Update the input field with the most recent spoken text
         document.getElementById('userAnswer').value = spokenText;
 
-        // Provide some simple feedback based on what's said
+        // Provide simple feedback based on the response
         provideFeedback(spokenText);
     };
 
+    // Handle errors
     recognition.onerror = function(event) {
         console.error('Speech recognition error', event.error);
         alert('There was an error with the voice recognition.');
     };
 
-    // Start recognition when the button is clicked
+    // Start speech recognition on button click
     document.getElementById('startRecognition').addEventListener('click', function() {
         recognition.start();
     });
@@ -137,13 +128,13 @@ if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
     alert('Speech Recognition is not supported in your browser.');
 }
 
-// Simple feedback function based on user response
-function provideFeedback(text) {
+// Provide feedback based on the spoken answer
+function provideFeedback(spokenText) {
     let feedbackMessage = '';
-    
-    if (text.toLowerCase().includes('strength')) {
+
+    if (spokenText.toLowerCase().includes('strength')) {
         feedbackMessage = 'Great! You mentioned your strengths, but can you elaborate more on how it helps in your work?';
-    } else if (text.toLowerCase().includes('weakness')) {
+    } else if (spokenText.toLowerCase().includes('weakness')) {
         feedbackMessage = 'Hmm, interesting. Can you provide an example of when this weakness affected your performance?';
     } else {
         feedbackMessage = 'Nice answer! Please continue speaking or type if you prefer.';
